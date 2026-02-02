@@ -30,8 +30,34 @@ Antenna checks your OpenClaw deployment for security issues across multiple laye
 antenna audit              # Run security audit
 antenna fix [FINDING_ID]   # Auto-fix a finding
 antenna accept <ID>        # Accept a risk with documentation
-antenna watch              # Start runtime monitoring (TODO)
+antenna watch              # Start runtime monitoring daemon
+antenna incident           # Generate incident report
+antenna init               # Initialize configuration
 ```
+
+## Pre-start Integration
+
+Block OpenClaw startup on security findings:
+
+```bash
+# Simple pre-start check
+antenna audit --fail-on blocked && openclaw gateway
+
+# Systemd unit (ExecStartPre)
+[Service]
+ExecStartPre=/usr/local/bin/antenna audit --fail-on blocked
+ExecStart=/usr/local/bin/openclaw gateway
+
+# package.json scripts
+{
+  "scripts": {
+    "start": "antenna audit --fail-on blocked && openclaw gateway",
+    "audit": "antenna audit"
+  }
+}
+```
+
+The `--fail-on` flag accepts: `blocked`, `critical`, or `warning`.
 
 ## Example Output
 

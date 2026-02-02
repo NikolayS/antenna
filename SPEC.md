@@ -1191,7 +1191,7 @@ antenna/
 - [x] `fs.watch` on config/transcript directories
 - [x] Watch daemon (outputs to stdout/file)
 - [x] Incident correlation with accepted risks
-- [ ] OpenClaw pre-start integration
+- [x] OpenClaw pre-start integration
 
 ### Phase 4: Polish (Week 4+)
 - [ ] HTML report output

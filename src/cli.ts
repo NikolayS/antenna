@@ -477,6 +477,21 @@ async function runInit(options: {
   console.log('  2. Fix blocked findings: antenna fix --all');
   console.log('  3. Accept remaining risks: antenna accept <ID> --reason "..."');
   console.log('  4. Start monitoring: antenna watch');
+
+  // Show pre-start integration
+  console.log('\n─────────────────────────────────────────────');
+  console.log('Pre-start Integration (Optional)');
+  console.log('─────────────────────────────────────────────');
+  console.log('\nBlock OpenClaw startup on blocked findings:');
+  console.log('  antenna audit --fail-on blocked && openclaw gateway');
+  console.log('\nOr add to systemd unit:');
+  console.log('  [Service]');
+  console.log('  ExecStartPre=/usr/local/bin/antenna audit --fail-on blocked');
+  console.log('  ExecStart=/usr/local/bin/openclaw gateway');
+  console.log('\nOr add to package.json:');
+  console.log('  "scripts": {');
+  console.log('    "start": "antenna audit --fail-on blocked && openclaw gateway"');
+  console.log('  }');
 }
 
 async function runIncident(options: {
