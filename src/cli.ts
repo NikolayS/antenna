@@ -5,6 +5,7 @@ import {
   CredentialsChecker,
   InfrastructureChecker,
   NetworkChecker,
+  SkillsChecker,
   ToolsChecker,
 } from './checks/index.js';
 import type { AuditReport, Finding } from './models.js';
@@ -134,17 +135,34 @@ function createProgram(): Command {
     .command('scan [path]')
     .description('Scan skills for vulnerabilities')
     .option('--all', 'Scan all installed skills')
-    .action(async (_path, _options) => {
-      console.log('Skills scanning not yet implemented');
-      // TODO: Implement skill scanning
+    .action(async (path, _options) => {
+      const checker = new SkillsChecker();
+      const result = await checker.scanSkills(path);
+
+      if (result.skipped) {
+        printWarning(result.skipped);
+        return;
+      }
+
+      if (result.findings.length === 0) {
+        printSuccess('No security issues found');
+      } else {
+        for (const finding of result.findings) {
+          printError(`${finding.id}: ${finding.title}`);
+          console.log(`  ${finding.message}`);
+        }
+      }
     });
 
   skills
     .command('check <url>')
     .description('Check a skill before installing')
-    .action(async (_url) => {
-      console.log('Skill checking not yet implemented');
-      // TODO: Implement skill checking
+    .action(async (url) => {
+      printWarning(`Skill checking for ${url} not yet implemented`);
+      console.log(
+        'Install skill-scanner: npm install -g @cisco-ai-defense/skill-scanner',
+      );
+      console.log(`Then run: skill-scanner check ${url}`);
     });
 
   // report command
@@ -200,6 +218,12 @@ async function runAudit(options: {
   const toolsResult = await toolsChecker.run();
   findings.push(...toolsResult.findings);
   if (toolsResult.skipped) skipped.push(`Tools: ${toolsResult.skipped}`);
+
+  // Run skills checks
+  const skillsChecker = new SkillsChecker();
+  const skillsResult = await skillsChecker.run();
+  findings.push(...skillsResult.findings);
+  if (skillsResult.skipped) skipped.push(`Skills: ${skillsResult.skipped}`);
 
   // Create report
   const hostname = exec('hostname').stdout || 'unknown';

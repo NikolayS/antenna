@@ -1182,8 +1182,8 @@ antenna/
 - [x] Group mention gating — in channels.ts CHAN-009
 - [x] Sandbox network egress — in tools.ts TOOL-006
 - [x] Log redaction checks — in credentials.ts CRED-006
-- [ ] Plugin allowlist checks
-- [ ] Skill Scanner integration
+- [x] Plugin allowlist checks
+- [x] Skill Scanner integration
 - [x] JSON/Markdown output formats
 
 ### Phase 3: Lite Runtime (Week 3-4)
