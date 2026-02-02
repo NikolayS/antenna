@@ -1166,15 +1166,15 @@ antenna/
 ## 10. Implementation Phases
 
 ### Phase 1: Core Audit — MVP (Week 1-2)
-- [ ] Project setup (TypeScript, Bun, tsconfig, biome)
-- [ ] CLI scaffold with Commander.js
-- [ ] Infrastructure checks (SSH, firewall, fail2ban) with **drop-in config fixes**
+- [x] Project setup (TypeScript, Bun, tsconfig, biome)
+- [x] CLI scaffold with Commander.js
+- [x] Infrastructure checks (SSH, firewall, fail2ban) with **drop-in config fixes**
 - [ ] Network checks (gateway exposure, auth)
 - [ ] Channel policy checks
 - [ ] Credential permission checks
 - [ ] Risk acceptance system (JSONL, root-owned)
-- [ ] Console output with picocolors
-- [ ] Publish to npm as `antenna`
+- [x] Console output with picocolors
+- [ ] Publish to npm as `antenna-security` (antenna is taken)
 - [ ] **Pin dependencies, run `npm audit` in CI**
 
 ### Phase 2: Full OCSAS Coverage (Week 2-3)

@@ -1,0 +1,48 @@
+{
+  "name": "antenna-security",
+  "version": "0.1.0",
+  "description": "Security audit and monitoring for OpenClaw deployments on Ubuntu VMs",
+  "type": "module",
+  "bin": {
+    "antenna": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "lint": "biome check src tests",
+    "lint:fix": "biome check --write src tests",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "security",
+    "audit",
+    "openclaw",
+    "ai-agent",
+    "monitoring",
+    "ubuntu",
+    "hardening"
+  ],
+  "author": "Nikolay Samokhvalov",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NikolayS/antenna.git"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.1.14",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
