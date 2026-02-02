@@ -211,7 +211,7 @@ async function runAudit(options: {
     process.exit(1);
   }
 
-  if (profile) {
+  if (profile && options.output === 'text') {
     console.log(`Using profile: ${profile.name} - ${profile.description}`);
   }
 
