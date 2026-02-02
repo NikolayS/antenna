@@ -1175,7 +1175,7 @@ antenna/
 - [x] Risk acceptance system (JSONL, root-owned)
 - [x] Console output with picocolors
 - [ ] Publish to npm as `antenna-security` (antenna is taken)
-- [ ] **Pin dependencies, run `npm audit` in CI**
+- [x] **Pin dependencies, run `npm audit` in CI**
 
 ### Phase 2: Full OCSAS Coverage (Week 2-3)
 - [ ] Session isolation checks (dmScope)
