@@ -17,6 +17,7 @@ import {
   printSuccess,
   printWarning,
 } from './output/index.js';
+import { IncidentReporter } from './incident/index.js';
 import {
   SecurityWatcher,
   generateAuditdRules,
@@ -117,9 +118,8 @@ function createProgram(): Command {
     .option('--last', 'Show last incident')
     .option('--date <date>', 'Show incident from specific date')
     .option('--encrypt-to <email>', 'Encrypt report to email')
-    .action(async (_options) => {
-      console.log('Incident reporting not yet implemented');
-      // TODO: Implement incident reporting
+    .action(async (options) => {
+      await runIncident(options);
     });
 
   // status command
@@ -477,6 +477,46 @@ async function runInit(options: {
   console.log('  2. Fix blocked findings: antenna fix --all');
   console.log('  3. Accept remaining risks: antenna accept <ID> --reason "..."');
   console.log('  4. Start monitoring: antenna watch');
+}
+
+async function runIncident(options: {
+  last?: boolean;
+  date?: string;
+  encryptTo?: string;
+}): Promise<void> {
+  const reporter = new IncidentReporter();
+
+  if (options.last) {
+    const report = await reporter.generateLastIncident();
+
+    if (!report) {
+      printWarning('No recent incidents found');
+      console.log('Events are logged to ~/.openclaw/antenna-events.jsonl');
+      console.log('Run "antenna watch --output ~/.openclaw/antenna-events.jsonl" to log events');
+      return;
+    }
+
+    console.log(reporter.formatAsMarkdown(report));
+    return;
+  }
+
+  if (options.date) {
+    printWarning(`Incident lookup by date not yet implemented`);
+    console.log(`Looking for incidents on: ${options.date}`);
+    return;
+  }
+
+  // Default: show last incident
+  const report = await reporter.generateLastIncident();
+
+  if (!report) {
+    printWarning('No recent incidents found');
+    console.log('\nTo log events, run:');
+    console.log('  antenna watch --output ~/.openclaw/antenna-events.jsonl');
+    return;
+  }
+
+  console.log(reporter.formatAsMarkdown(report));
 }
 
 export function run(): void {

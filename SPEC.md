@@ -1190,7 +1190,7 @@ antenna/
 - [x] `auditd` rules for sensitive file access
 - [x] `fs.watch` on config/transcript directories
 - [x] Watch daemon (outputs to stdout/file)
-- [ ] Incident correlation with accepted risks
+- [x] Incident correlation with accepted risks
 - [ ] OpenClaw pre-start integration
 
 ### Phase 4: Polish (Week 4+)
