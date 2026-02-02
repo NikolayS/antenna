@@ -1187,9 +1187,9 @@ antenna/
 - [x] JSON/Markdown output formats
 
 ### Phase 3: Lite Runtime (Week 3-4)
-- [ ] `auditd` rules for sensitive file access
-- [ ] `fs.watch` on config/transcript directories
-- [ ] Watch daemon (outputs to stdout/file)
+- [x] `auditd` rules for sensitive file access
+- [x] `fs.watch` on config/transcript directories
+- [x] Watch daemon (outputs to stdout/file)
 - [ ] Incident correlation with accepted risks
 - [ ] OpenClaw pre-start integration
 

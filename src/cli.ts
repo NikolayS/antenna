@@ -17,6 +17,11 @@ import {
   printSuccess,
   printWarning,
 } from './output/index.js';
+import {
+  SecurityWatcher,
+  generateAuditdRules,
+  installAuditdRules,
+} from './runtime/index.js';
 import { exec } from './utils/exec.js';
 
 const VERSION = '0.1.0';
@@ -90,9 +95,9 @@ function createProgram(): Command {
       '60',
     )
     .option('-o, --output <file>', 'Write events to file')
-    .action(async (_options) => {
-      console.log('Watch mode not yet implemented');
-      // TODO: Implement watch daemon
+    .option('--install-rules', 'Install auditd rules')
+    .action(async (options) => {
+      await runWatch(options);
     });
 
   // init command
@@ -100,9 +105,9 @@ function createProgram(): Command {
     .command('init')
     .description('Initialize Antenna configuration')
     .option('--hardened', 'Use hardened defaults')
-    .action(async (_options) => {
-      console.log('Init not yet implemented');
-      // TODO: Implement init
+    .option('--install-auditd', 'Install auditd rules for monitoring')
+    .action(async (options) => {
+      await runInit(options);
     });
 
   // incident command
@@ -389,6 +394,89 @@ async function runAccept(
   console.log(`  Reason: ${acceptance.reason}`);
   console.log(`  Expires: ${acceptance.expires_at}`);
   console.log(`  File: ${manager.getFilePath()}`);
+}
+
+async function runWatch(options: {
+  killOn?: string;
+  maxKillsPerHour?: string;
+  restartAfter?: string;
+  startupCooldown?: string;
+  output?: string;
+  installRules?: boolean;
+}): Promise<void> {
+  // Install auditd rules if requested
+  if (options.installRules) {
+    console.log('Installing auditd rules...');
+    const success = installAuditdRules('openclaw', false);
+    if (!success) {
+      printError('Failed to install auditd rules');
+      process.exit(1);
+    }
+    printSuccess('Auditd rules installed');
+  }
+
+  // Start the watcher
+  const watcher = new SecurityWatcher({
+    killOn: options.killOn as 'critical' | 'high' | undefined,
+    maxKillsPerHour: options.maxKillsPerHour
+      ? Number.parseInt(options.maxKillsPerHour, 10)
+      : undefined,
+    restartAfter: options.restartAfter
+      ? Number.parseInt(options.restartAfter, 10)
+      : undefined,
+    startupCooldown: options.startupCooldown
+      ? Number.parseInt(options.startupCooldown, 10)
+      : undefined,
+    outputFile: options.output,
+  });
+
+  // Handle shutdown signals
+  process.on('SIGINT', () => {
+    console.log('\nReceived SIGINT, shutting down...');
+    watcher.stop();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('\nReceived SIGTERM, shutting down...');
+    watcher.stop();
+    process.exit(0);
+  });
+
+  await watcher.start();
+}
+
+async function runInit(options: {
+  hardened?: boolean;
+  installAuditd?: boolean;
+}): Promise<void> {
+  console.log('Initializing Antenna...');
+
+  // Install auditd rules if requested
+  if (options.installAuditd) {
+    console.log('\nInstalling auditd rules...');
+    const success = installAuditdRules('openclaw', false);
+    if (success) {
+      printSuccess('Auditd rules installed');
+    } else {
+      printWarning('Failed to install auditd rules (may need sudo)');
+    }
+  }
+
+  // Show auditd rules for manual installation
+  if (!options.installAuditd) {
+    console.log('\nTo enable runtime monitoring, install auditd rules:');
+    console.log('  sudo antenna init --install-auditd');
+    console.log('\nOr manually add these rules to /etc/audit/rules.d/antenna.rules:');
+    console.log(generateAuditdRules('openclaw'));
+  }
+
+  // Show next steps
+  console.log('\nNext steps:');
+  console.log('  1. Run: antenna audit');
+  console.log('  2. Fix blocked findings: antenna fix --all');
+  console.log('  3. Accept remaining risks: antenna accept <ID> --reason "..."');
+  console.log('  4. Start monitoring: antenna watch');
 }
 
 export function run(): void {
