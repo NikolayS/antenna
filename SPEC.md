@@ -1196,7 +1196,7 @@ antenna/
 ### Phase 4: Polish (Week 4+)
 - [x] HTML report output
 - [ ] `antenna probe --from <host>` for external validation
-- [ ] Profile presets (public-bot, internal-agent, prod-enterprise)
+- [x] Profile presets (public-bot, internal-agent, prod-enterprise)
 - [ ] Documentation
 - [ ] Integration tests with Vitest
 

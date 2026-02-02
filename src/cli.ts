@@ -25,6 +25,12 @@ import {
   installAuditdRules,
 } from './runtime/index.js';
 import { exec } from './utils/exec.js';
+import {
+  getProfile,
+  listProfiles,
+  applySeverityOverride,
+  shouldSkipFinding,
+} from './profiles.js';
 
 const VERSION = '0.1.0';
 
@@ -50,6 +56,10 @@ function createProgram(): Command {
       '--fail-on <level>',
       'Exit with code 1 if findings at level',
       'blocked',
+    )
+    .option(
+      '--profile <name>',
+      'Security profile: public-bot, internal-agent, prod-enterprise',
     )
     .action(async (options) => {
       await runAudit(options);
@@ -191,7 +201,20 @@ async function runAudit(options: {
   output: string;
   auditd?: boolean;
   failOn: string;
+  profile?: string;
 }): Promise<void> {
+  // Load profile if specified
+  const profile = options.profile ? getProfile(options.profile) : undefined;
+  if (options.profile && !profile) {
+    printError(`Unknown profile: ${options.profile}`);
+    console.log(`Available profiles: ${listProfiles().join(', ')}`);
+    process.exit(1);
+  }
+
+  if (profile) {
+    console.log(`Using profile: ${profile.name} - ${profile.description}`);
+  }
+
   const findings: Finding[] = [];
   const skipped: string[] = [];
 
@@ -231,20 +254,31 @@ async function runAudit(options: {
   findings.push(...skillsResult.findings);
   if (skillsResult.skipped) skipped.push(`Skills: ${skillsResult.skipped}`);
 
+  // Apply profile overrides and filter skipped findings
+  let processedFindings = findings;
+  if (profile) {
+    processedFindings = findings
+      .filter((f) => !shouldSkipFinding(profile, f.id))
+      .map((f) => ({
+        ...f,
+        level: applySeverityOverride(profile, f.id, f.level),
+      }));
+  }
+
   // Create report
   const hostname = exec('hostname').stdout || 'unknown';
   const report: AuditReport = {
     timestamp: new Date().toISOString(),
     version: VERSION,
     hostname,
-    findings,
+    findings: processedFindings,
     acceptedRisks: [],
-    score: calculateScore(findings),
+    score: calculateScore(processedFindings),
     summary: {
-      blocked: findings.filter((f) => f.level === 'block').length,
-      critical: findings.filter((f) => f.level === 'critical').length,
-      warnings: findings.filter((f) => f.level === 'warning').length,
-      info: findings.filter((f) => f.level === 'info').length,
+      blocked: processedFindings.filter((f) => f.level === 'block').length,
+      critical: processedFindings.filter((f) => f.level === 'critical').length,
+      warnings: processedFindings.filter((f) => f.level === 'warning').length,
+      info: processedFindings.filter((f) => f.level === 'info').length,
     },
   };
 
