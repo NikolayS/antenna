@@ -1197,7 +1197,7 @@ antenna/
 - [x] HTML report output
 - [ ] `antenna probe --from <host>` for external validation
 - [x] Profile presets (public-bot, internal-agent, prod-enterprise)
-- [ ] Documentation
+- [x] Documentation
 - [x] Integration tests with Vitest
 
 ---

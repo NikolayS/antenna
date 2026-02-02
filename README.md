@@ -23,16 +23,123 @@ Antenna checks your OpenClaw deployment for security issues across multiple laye
 - **Network**: Gateway exposure, TLS, authentication
 - **Channels**: DM/group policies, session isolation
 - **Credentials**: File permissions, secret scanning, API key detection
+- **Tools**: Sandbox configuration, elevated permissions
+- **Skills**: Plugin allowlist, version pinning
 
 ## Commands
 
+### Audit
+
 ```bash
-antenna audit              # Run security audit
-antenna fix [FINDING_ID]   # Auto-fix a finding
-antenna accept <ID>        # Accept a risk with documentation
-antenna watch              # Start runtime monitoring daemon
-antenna incident           # Generate incident report
-antenna init               # Initialize configuration
+# Basic audit (text output)
+antenna audit
+
+# JSON output for automation
+antenna audit --output json
+
+# Markdown report
+antenna audit --output md > report.md
+
+# HTML report
+antenna audit --output html > report.html
+
+# Use security profile
+antenna audit --profile public-bot
+antenna audit --profile internal-agent
+antenna audit --profile prod-enterprise
+
+# Exit with error on blocked/critical findings
+antenna audit --fail-on blocked   # default
+antenna audit --fail-on critical
+antenna audit --fail-on warning
+```
+
+### Fix
+
+```bash
+# Fix a specific finding
+antenna fix INFRA-001
+
+# Fix all auto-fixable findings
+antenna fix --all
+
+# Preview what would be fixed
+antenna fix --all --dry-run
+```
+
+### Accept Risk
+
+```bash
+# Accept a risk with documentation
+antenna accept CHAN-001 \
+  --reason "Public support bot" \
+  --mitigations "tools disabled,sandbox enabled" \
+  --expires 30
+```
+
+Acceptances are stored with SHA256 hash chain verification for tamper evidence.
+
+### Watch (Runtime Monitoring)
+
+```bash
+# Start monitoring daemon
+antenna watch
+
+# Kill gateway on critical findings (with rate limiting)
+antenna watch --kill-on critical --max-kills-per-hour 3
+
+# Auto-restart gateway after kill
+antenna watch --kill-on critical --restart-after 60
+
+# Startup cooldown (prevent boot loops)
+antenna watch --kill-on critical --startup-cooldown 60
+
+# Output events to file
+antenna watch --output /var/log/antenna/events.jsonl
+```
+
+### Incident Reports
+
+```bash
+# Generate report for last incident
+antenna incident --last
+
+# View incident by date
+antenna incident --date 2026-02-01
+```
+
+### Initialize
+
+```bash
+# Setup Antenna
+antenna init
+
+# Install auditd rules
+antenna init --install-auditd
+```
+
+### Skills Scanning
+
+```bash
+# Scan installed skills
+antenna skills scan ~/.openclaw/skills/
+
+# Check a skill before installing
+antenna skills check https://github.com/user/skill
+```
+
+## Security Profiles
+
+Profiles adjust severity levels for different deployment scenarios:
+
+| Profile | Description | Use Case |
+|---------|-------------|----------|
+| `public-bot` | Maximum security | Public-facing bots on Telegram/Discord |
+| `internal-agent` | Balanced security | Internal tools for trusted employees |
+| `prod-enterprise` | Strict compliance | Production enterprise deployments |
+
+```bash
+antenna audit --profile public-bot
 ```
 
 ## Pre-start Integration
@@ -56,8 +163,6 @@ ExecStart=/usr/local/bin/openclaw gateway
   }
 }
 ```
-
-The `--fail-on` flag accepts: `blocked`, `critical`, or `warning`.
 
 ## Example Output
 
@@ -84,24 +189,24 @@ The `--fail-on` flag accepts: `blocked`, `critical`, or `warning`.
   Score: 35/100
 ```
 
-## Risk Acceptance
+## Severity Levels
 
-For findings you've reviewed and accept:
-
-```bash
-antenna accept CHAN-001 \
-  --reason "Public support bot" \
-  --mitigations "tools disabled,sandbox enabled" \
-  --expires 30
-```
-
-Acceptances are stored with hash chain verification for tamper evidence.
+| Level | Description |
+|-------|-------------|
+| 🔴 BLOCK | Must be fixed before proceeding |
+| 🟠 CRIT | Requires explicit risk acceptance |
+| 🟡 WARN | Strong recommendation to fix |
+| 🔵 INFO | Best practice recommendation |
 
 ## Target Environment
 
 - **OS**: Ubuntu 22.04 LTS, 24.04 LTS
 - **Runtime**: OpenClaw with Node.js 22+
 - **Not for**: macOS local installs, Docker-only deployments
+
+## OCSAS Compatibility
+
+Antenna implements checks for [OCSAS](https://github.com/gensecaihq/ocsas) (OpenClaw Security Assurance Standard) controls plus additional infrastructure checks.
 
 ## Development
 
