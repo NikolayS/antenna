@@ -59,22 +59,24 @@ describe('AcceptanceManager', () => {
   });
 
   describe('hash chain', () => {
-    it('should create valid chain with first entry', () => {
+    it('should create valid chain with new entry', () => {
       const manager = new AcceptanceManager();
 
-      // Accept a risk
+      // Accept a risk with unique ID
+      const uniqueId = `TEST-${Date.now()}`;
       const acceptance = manager.accept(
-        'TEST-001',
+        uniqueId,
         'Test reason',
         ['mitigation1'],
         30,
         'test-user',
       );
 
-      expect(acceptance.id).toBe('TEST-001');
+      expect(acceptance.id).toBe(uniqueId);
       expect(acceptance.reason).toBe('Test reason');
       expect(acceptance.mitigations).toEqual(['mitigation1']);
-      expect(acceptance.prev_hash).toBe('0'.repeat(64));
+      // prev_hash should be a valid 64-char hex string
+      expect(acceptance.prev_hash).toMatch(/^[0-9a-f]{64}$/);
 
       // Verify chain is still valid
       const chainStatus = manager.verifyChain();

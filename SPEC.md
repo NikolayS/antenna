@@ -1170,7 +1170,7 @@ antenna/
 - [x] CLI scaffold with Commander.js
 - [x] Infrastructure checks (SSH, firewall, fail2ban) with **drop-in config fixes**
 - [x] Network checks (gateway exposure, auth)
-- [ ] Channel policy checks
+- [x] Channel policy checks
 - [x] Credential permission checks
 - [x] Risk acceptance system (JSONL, root-owned)
 - [x] Console output with picocolors

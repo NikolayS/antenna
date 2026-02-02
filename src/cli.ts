@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { AcceptanceManager } from './acceptance/index.js';
 import {
+  ChannelsChecker,
   CredentialsChecker,
   InfrastructureChecker,
   NetworkChecker,
@@ -184,6 +185,12 @@ async function runAudit(options: {
   const credentialsResult = await credentialsChecker.run();
   findings.push(...credentialsResult.findings);
   if (credentialsResult.skipped) skipped.push(`Credentials: ${credentialsResult.skipped}`);
+
+  // Run channels checks
+  const channelsChecker = new ChannelsChecker();
+  const channelsResult = await channelsChecker.run();
+  findings.push(...channelsResult.findings);
+  if (channelsResult.skipped) skipped.push(`Channels: ${channelsResult.skipped}`);
 
   // Create report
   const hostname = exec('hostname').stdout || 'unknown';
