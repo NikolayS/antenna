@@ -5,6 +5,7 @@ import {
   CredentialsChecker,
   InfrastructureChecker,
   NetworkChecker,
+  ToolsChecker,
 } from './checks/index.js';
 import type { AuditReport, Finding } from './models.js';
 import {
@@ -191,6 +192,12 @@ async function runAudit(options: {
   const channelsResult = await channelsChecker.run();
   findings.push(...channelsResult.findings);
   if (channelsResult.skipped) skipped.push(`Channels: ${channelsResult.skipped}`);
+
+  // Run tools checks
+  const toolsChecker = new ToolsChecker();
+  const toolsResult = await toolsChecker.run();
+  findings.push(...toolsResult.findings);
+  if (toolsResult.skipped) skipped.push(`Tools: ${toolsResult.skipped}`);
 
   // Create report
   const hostname = exec('hostname').stdout || 'unknown';

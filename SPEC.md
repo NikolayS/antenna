@@ -1178,10 +1178,10 @@ antenna/
 - [x] **Pin dependencies, run `npm audit` in CI**
 
 ### Phase 2: Full OCSAS Coverage (Week 2-3)
-- [ ] Session isolation checks (dmScope)
-- [ ] Group mention gating
-- [ ] Sandbox network egress
-- [ ] Log redaction checks
+- [x] Session isolation checks (dmScope) — in channels.ts CHAN-008
+- [x] Group mention gating — in channels.ts CHAN-009
+- [x] Sandbox network egress — in tools.ts TOOL-006
+- [x] Log redaction checks — in credentials.ts CRED-006
 - [ ] Plugin allowlist checks
 - [ ] Skill Scanner integration
 - [ ] JSON/Markdown output formats
