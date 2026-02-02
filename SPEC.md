@@ -1169,10 +1169,10 @@ antenna/
 - [x] Project setup (TypeScript, Bun, tsconfig, biome)
 - [x] CLI scaffold with Commander.js
 - [x] Infrastructure checks (SSH, firewall, fail2ban) with **drop-in config fixes**
-- [ ] Network checks (gateway exposure, auth)
+- [x] Network checks (gateway exposure, auth)
 - [ ] Channel policy checks
-- [ ] Credential permission checks
-- [ ] Risk acceptance system (JSONL, root-owned)
+- [x] Credential permission checks
+- [x] Risk acceptance system (JSONL, root-owned)
 - [x] Console output with picocolors
 - [ ] Publish to npm as `antenna-security` (antenna is taken)
 - [ ] **Pin dependencies, run `npm audit` in CI**

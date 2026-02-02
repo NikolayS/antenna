@@ -1,7 +1,17 @@
 import { Command } from 'commander';
-import { InfrastructureChecker } from './checks/index.js';
+import { AcceptanceManager } from './acceptance/index.js';
+import {
+  CredentialsChecker,
+  InfrastructureChecker,
+  NetworkChecker,
+} from './checks/index.js';
 import type { AuditReport, Finding } from './models.js';
-import { printError, printReport, printSuccess } from './output/index.js';
+import {
+  printError,
+  printReport,
+  printSuccess,
+  printWarning,
+} from './output/index.js';
 import { exec } from './utils/exec.js';
 
 const VERSION = '0.1.0';
@@ -55,8 +65,7 @@ function createProgram(): Command {
     )
     .option('--expires <days>', 'Days until re-evaluation', '30')
     .action(async (findingId, options) => {
-      console.log(`Accepting ${findingId}: ${options.reason}`);
-      // TODO: Implement risk acceptance
+      await runAccept(findingId, options);
     });
 
   // watch command
@@ -156,11 +165,25 @@ async function runAudit(options: {
   failOn: string;
 }): Promise<void> {
   const findings: Finding[] = [];
+  const skipped: string[] = [];
 
   // Run infrastructure checks
   const infraChecker = new InfrastructureChecker();
   const infraResult = await infraChecker.run();
   findings.push(...infraResult.findings);
+  if (infraResult.skipped) skipped.push(`Infrastructure: ${infraResult.skipped}`);
+
+  // Run network checks
+  const networkChecker = new NetworkChecker();
+  const networkResult = await networkChecker.run();
+  findings.push(...networkResult.findings);
+  if (networkResult.skipped) skipped.push(`Network: ${networkResult.skipped}`);
+
+  // Run credentials checks
+  const credentialsChecker = new CredentialsChecker();
+  const credentialsResult = await credentialsChecker.run();
+  findings.push(...credentialsResult.findings);
+  if (credentialsResult.skipped) skipped.push(`Credentials: ${credentialsResult.skipped}`);
 
   // Create report
   const hostname = exec('hostname').stdout || 'unknown';
@@ -273,6 +296,53 @@ function calculateScore(findings: Finding[]): number {
   }
 
   return Math.max(0, score);
+}
+
+async function runAccept(
+  findingId: string,
+  options: { reason: string; mitigations?: string; expires: string },
+): Promise<void> {
+  const manager = new AcceptanceManager();
+
+  // Parse mitigations
+  const mitigations = options.mitigations
+    ? options.mitigations.split(',').map((m) => m.trim())
+    : [];
+
+  // Parse expiration days
+  const expirationDays = Number.parseInt(options.expires, 10);
+  if (Number.isNaN(expirationDays) || expirationDays <= 0) {
+    printError('Invalid expiration days');
+    process.exit(1);
+  }
+
+  // Warn if not using system file
+  if (!manager.isUsingSystemFile()) {
+    printWarning(
+      'Using user-level acceptance file. For production, run with sudo to use system file.',
+    );
+  }
+
+  // Verify chain integrity before adding
+  const chainStatus = manager.verifyChain();
+  if (!chainStatus.valid) {
+    printError(`Acceptance file integrity check failed: ${chainStatus.error}`);
+    printError('Cannot add new acceptance until file is fixed.');
+    process.exit(1);
+  }
+
+  // Accept the risk
+  const acceptance = manager.accept(
+    findingId,
+    options.reason,
+    mitigations,
+    expirationDays,
+  );
+
+  printSuccess(`Accepted ${findingId}`);
+  console.log(`  Reason: ${acceptance.reason}`);
+  console.log(`  Expires: ${acceptance.expires_at}`);
+  console.log(`  File: ${manager.getFilePath()}`);
 }
 
 export function run(): void {
