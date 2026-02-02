@@ -9,6 +9,8 @@ import {
 } from './checks/index.js';
 import type { AuditReport, Finding } from './models.js';
 import {
+  generateJson,
+  generateMarkdown,
   printError,
   printReport,
   printSuccess,
@@ -217,10 +219,16 @@ async function runAudit(options: {
   };
 
   // Output
-  if (options.output === 'json') {
-    console.log(JSON.stringify(report, null, 2));
-  } else {
-    printReport(report);
+  switch (options.output) {
+    case 'json':
+      console.log(generateJson(report));
+      break;
+    case 'md':
+    case 'markdown':
+      console.log(generateMarkdown(report));
+      break;
+    default:
+      printReport(report);
   }
 
   // Auto-fix if requested

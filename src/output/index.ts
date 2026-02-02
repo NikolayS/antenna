@@ -6,3 +6,5 @@ export {
   printError,
   printWarning,
 } from './console.js';
+export { generateMarkdown } from './markdown.js';
+export { generateJson } from './json.js';

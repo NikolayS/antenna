@@ -1184,7 +1184,7 @@ antenna/
 - [x] Log redaction checks — in credentials.ts CRED-006
 - [ ] Plugin allowlist checks
 - [ ] Skill Scanner integration
-- [ ] JSON/Markdown output formats
+- [x] JSON/Markdown output formats
 
 ### Phase 3: Lite Runtime (Week 3-4)
 - [ ] `auditd` rules for sensitive file access
