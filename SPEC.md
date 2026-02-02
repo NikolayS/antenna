@@ -1194,7 +1194,7 @@ antenna/
 - [x] OpenClaw pre-start integration
 
 ### Phase 4: Polish (Week 4+)
-- [ ] HTML report output
+- [x] HTML report output
 - [ ] `antenna probe --from <host>` for external validation
 - [ ] Profile presets (public-bot, internal-agent, prod-enterprise)
 - [ ] Documentation

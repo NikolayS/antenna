@@ -10,6 +10,7 @@ import {
 } from './checks/index.js';
 import type { AuditReport, Finding } from './models.js';
 import {
+  generateHtml,
   generateJson,
   generateMarkdown,
   printError,
@@ -43,7 +44,7 @@ function createProgram(): Command {
     .description('Run security audit')
     .option('--deep', 'Run deep audit including Lynis')
     .option('--fix', 'Automatically fix safe issues')
-    .option('-o, --output <format>', 'Output format: text, json, md', 'text')
+    .option('-o, --output <format>', 'Output format: text, json, md, html', 'text')
     .option('--no-auditd', 'Skip auditd-related checks')
     .option(
       '--fail-on <level>',
@@ -255,6 +256,9 @@ async function runAudit(options: {
     case 'md':
     case 'markdown':
       console.log(generateMarkdown(report));
+      break;
+    case 'html':
+      console.log(generateHtml(report));
       break;
     default:
       printReport(report);
